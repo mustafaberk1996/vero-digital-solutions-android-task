@@ -51,9 +51,13 @@ class MainViewModel @Inject constructor(
 
 
     init {
+        fetchTaskList()
+    }
+
+    private fun fetchTaskList() {
         viewModelScope.launch {
-             _uiState.value = MainUiState.Loading
-             _uiState.value = fetchTasks()
+            _uiState.value = MainUiState.Loading
+            _uiState.value = fetchTasks()
         }
     }
 
@@ -67,6 +71,10 @@ class MainViewModel @Inject constructor(
             logoutUseCase()
             _uiState.value = MainUiState.Logout
         }
+    }
+
+    fun onRefresh() {
+        fetchTaskList()
     }
 
 }

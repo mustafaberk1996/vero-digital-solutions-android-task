@@ -18,11 +18,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,7 +70,10 @@ class MainActivity : ComponentActivity() {
                         onQueryChanged = {
                             viewModel.onQueryChanged(it)
                         },
-                        query = query
+                        query = query,
+                        onRefresh = {
+                            viewModel.onRefresh()
+                        }
                     )
 
                 }
@@ -84,6 +89,7 @@ fun MainContent(
     filteredTasks:List<Task> = emptyList(),
     onLogoutButtonClicked: () -> Unit,
     onQueryChanged: (String) -> Unit,
+    onRefresh: () -> Unit,
     query: String
 ) {
     Box(
@@ -99,7 +105,13 @@ fun MainContent(
                     LoadingState()
                 }
                 is MainUiState.TaskList -> {
-                    TaskListContent(tasks = filteredTasks, onQueryChanged = onQueryChanged, query = query)
+                    TaskListContent(
+                        tasks = filteredTasks,
+                        onQueryChanged = onQueryChanged,
+                        query = query,
+                        isRefreshing = state == MainUiState.Loading,
+                        onRefresh = onRefresh
+                    )
                 }
                 is MainUiState.Error -> {
                     ErrorState(message = state.throwable?.localizedMessage.orEmpty(), {})
@@ -113,8 +125,16 @@ fun MainContent(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskListContent(modifier: Modifier = Modifier, tasks: List<Task>, onQueryChanged: (String) -> Unit = {}, query: String) {
+fun TaskListContent(
+    modifier: Modifier = Modifier,
+    tasks: List<Task>,
+    onQueryChanged: (String) -> Unit,
+    query: String,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit,
+) {
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -129,14 +149,20 @@ fun TaskListContent(modifier: Modifier = Modifier, tasks: List<Task>, onQueryCha
                     .fillMaxWidth()
             )
 
-            if (!tasks.isEmpty()) {
-                LazyColumn {
-                    items(tasks) { item ->
-                        TaskRow(item)
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier
+            ) {
+                if (!tasks.isEmpty()) {
+                    LazyColumn {
+                        items(tasks) { item ->
+                            TaskRow(item)
+                        }
                     }
+                } else {
+                    EmptyState()
                 }
-            } else {
-                EmptyState()
             }
         }
     }
