@@ -6,42 +6,71 @@ object MockData {
 
     val tasks = listOf(
         Task(
-            task = "Task-001",
-            title = "Prepare Reports",
-            description = "Create weekly performance and analysis report for management.",
-            colorCode = "#FF5722"
+            task = "TASK-001",
+            title = "Prepare Monthly Report",
+            description = "Compile all department monthly reports and submit to management.",
+            colorCode = "#FF5722",
+            sort = 1,
+            wageType = "Hourly",
+            businessUnitKey = "BU001",
+            businessUnit = "Finance",
+            parentTaskID = "",
+            preplanningBoardQuickSelect = "Reports",
+            workingTime = "09:00-17:00",
+            externalId = "EXT001",
+            isAvailableInTimeTrackingKioskMode = true,
+            isAbstract = false
         ),
         Task(
-            task = "Task-002",
+            task = "TASK-002",
             title = "Design Homepage",
-            description = "Update UI to match new brand style and improve user experience.",
-            colorCode = "#3F51B5"
+            description = "Redesign homepage according to the new UI/UX guidelines.",
+            colorCode = "#3F51B5",
+            sort = 2,
+            wageType = "Fixed",
+            businessUnitKey = "BU002",
+            businessUnit = "Design",
+            parentTaskID = "",
+            preplanningBoardQuickSelect = "Designs",
+            workingTime = "10:00-18:00",
+            externalId = "EXT002",
+            isAvailableInTimeTrackingKioskMode = false,
+            isAbstract = false
         ),
         Task(
-            task = "Task-003",
+            task = "TASK-003",
             title = "Fix Login Bug",
-            description = "Resolve user session expiration issue found on Android 14.",
-            colorCode = "#4CAF50"
+            description = "Investigate and fix the login failure occurring on Android 14.",
+            colorCode = "#4CAF50",
+            sort = 3,
+            wageType = "Hourly",
+            businessUnitKey = "BU003",
+            businessUnit = "Development",
+            parentTaskID = "",
+            preplanningBoardQuickSelect = "Bugfix",
+            workingTime = "09:00-17:00",
+            externalId = "EXT003",
+            isAvailableInTimeTrackingKioskMode = true,
+            isAbstract = false
         ),
         Task(
-            task = "Task-004",
-            title = "Database Cleanup",
-            description = "Remove unused tables and optimize query performance.",
-            colorCode = "#FFC107"
-        ),
-        Task(
-            task = "Task-005",
-            title = "Write Documentation",
-            description = "Add API documentation for authentication and task modules.",
-            colorCode = "#9C27B0"
-        ),
-        Task(
-            task = "Task-006",
+            task = "TASK-004",
             title = "Security Review",
-            description = "Perform security audit on token handling and encryption.",
-            colorCode = "#E91E63"
+            description = "Perform full security audit for authentication module.",
+            colorCode = "#E91E63",
+            sort = 4,
+            wageType = "Fixed",
+            businessUnitKey = "BU004",
+            businessUnit = "Security",
+            parentTaskID = "",
+            preplanningBoardQuickSelect = "Audit",
+            workingTime = "08:00-16:00",
+            externalId = "EXT004",
+            isAvailableInTimeTrackingKioskMode = true,
+            isAbstract = false
         )
     )
+
 
 
 }

@@ -9,8 +9,7 @@ class FetchTasks @Inject constructor(
 ) {
     suspend operator fun invoke(): MainUiState  {
          return runCatching {
-            val result = taskRepository.getTasks()
-            if (result.isEmpty()) MainUiState.Empty else MainUiState.TaskList(result)
+            MainUiState.TaskList(taskRepository.getTasks())
         }.getOrElse { throwable-> MainUiState.Error(throwable) }
     }
 }
