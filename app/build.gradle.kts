@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)

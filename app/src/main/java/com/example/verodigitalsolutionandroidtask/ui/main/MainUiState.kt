@@ -5,7 +5,8 @@ import com.example.verodigitalsolutionandroidtask.domain.Task
 sealed class MainUiState {
     object Loading: MainUiState()
     class TaskList(val taskList:List<Task>): MainUiState()
-    object Error: MainUiState()
+    class Error(val throwable: Throwable?): MainUiState()
     object Empty: MainUiState()
+    object Logout: MainUiState()
     object Idle: MainUiState()
 }

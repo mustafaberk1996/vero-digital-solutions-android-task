@@ -3,6 +3,7 @@ package com.example.verodigitalsolutionandroidtask.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.verodigitalsolutionandroidtask.domain.usecase.FetchTasks
+import com.example.verodigitalsolutionandroidtask.domain.usecase.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -10,7 +11,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val fetchTasks: FetchTasks
+    private val fetchTasks: FetchTasks,
+    private val logoutUseCase: LogoutUseCase
 ): ViewModel() {
 
 
@@ -24,4 +26,12 @@ class MainViewModel @Inject constructor(
              _uiState.value = fetchTasks()
         }
     }
+
+    fun logout() {
+        viewModelScope.launch {
+            logoutUseCase()
+            _uiState.value = MainUiState.Logout
+        }
+    }
+
 }
