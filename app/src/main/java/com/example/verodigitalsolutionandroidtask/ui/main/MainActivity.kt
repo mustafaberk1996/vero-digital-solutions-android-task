@@ -4,8 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,31 +31,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.ui.RefreshWorker
 import com.example.verodigitalsolutionandroidtask.ui.component.EmptyState
 import com.example.verodigitalsolutionandroidtask.ui.component.ErrorState
 import com.example.verodigitalsolutionandroidtask.ui.component.LoadingState
 import com.example.verodigitalsolutionandroidtask.ui.theme.VeroDigitalSolutionAndroidTaskTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        startRefreshWorker()
         setContent {
 
             VeroDigitalSolutionAndroidTaskTheme {
                 val viewModel: MainViewModel = hiltViewModel()
-                val state: MainUiState by viewModel.uiState.collectAsState(MainUiState.Idle)
-                val filteredTasks: List<Task> by viewModel.filteredTasks.collectAsState(emptyList())
+                val state: MainUiState by viewModel.uiState.collectAsState()
                 val query:String by viewModel.query.collectAsState()
+                val lastFetchTime by viewModel.lastFetchTime.collectAsState(null)
 
                 LaunchedEffect(state) {
-                    if(state == MainUiState.Logout){
+                    if(state.logOut){
                         finish()
                     }
                 }
@@ -63,7 +72,7 @@ class MainActivity : ComponentActivity() {
                     MainContent(
                         modifier = Modifier.padding(innerPadding),
                         state = state,
-                        filteredTasks = filteredTasks,
+                        lastFetchTime = lastFetchTime,
                         onLogoutButtonClicked = {
                             viewModel.logout()
                         },
@@ -75,10 +84,20 @@ class MainActivity : ComponentActivity() {
                             viewModel.onRefresh()
                         }
                     )
-
                 }
             }
         }
+    }
+
+    private fun startRefreshWorker() {
+        val refreshRequest = PeriodicWorkRequestBuilder<RefreshWorker>(60, TimeUnit.MINUTES)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "refresh_worker",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            refreshRequest
+        )
     }
 }
 
@@ -86,38 +105,49 @@ class MainActivity : ComponentActivity() {
 fun MainContent(
     modifier: Modifier = Modifier,
     state: MainUiState,
-    filteredTasks:List<Task> = emptyList(),
     onLogoutButtonClicked: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onRefresh: () -> Unit,
-    query: String
+    query: String,
+    lastFetchTime: String? = null
 ) {
     Box(
         modifier = modifier
     ){
         Column {
-            Button(onClick = { onLogoutButtonClicked() }) {
-                Text("Logout")
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                if (!lastFetchTime.isNullOrBlank()) {
+                    Text("Last update: $lastFetchTime")
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(onClick = { onLogoutButtonClicked() }) {
+                    Text("Logout")
+                }
             }
 
-            when(state){
-                is MainUiState.Loading -> {
-                    LoadingState()
-                }
-                is MainUiState.TaskList -> {
-                    TaskListContent(
-                        tasks = filteredTasks,
-                        onQueryChanged = onQueryChanged,
-                        query = query,
-                        isRefreshing = state == MainUiState.Loading,
-                        onRefresh = onRefresh
-                    )
-                }
-                is MainUiState.Error -> {
-                    ErrorState(message = state.throwable?.localizedMessage.orEmpty(), {})
-                }
-                is MainUiState.Idle -> {}
-                is MainUiState.Logout -> {}
+            if (!state.data.isEmpty() || query.isNotEmpty()) {
+                SearchBar(
+                    query = query,
+                    onQueryChanged = onQueryChanged,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+
+            when {
+                state.isLoading -> LoadingState()
+                state.error != null -> ErrorState(message = state.error, onRefresh)
+                state.data.isEmpty() && state.query.isBlank()  -> EmptyState()
+                else ->  TaskListContent(
+                    tasks = state.data,
+                    isRefreshing = state.isLoading,
+                    onRefresh = onRefresh
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -130,8 +160,6 @@ fun MainContent(
 fun TaskListContent(
     modifier: Modifier = Modifier,
     tasks: List<Task>,
-    onQueryChanged: (String) -> Unit,
-    query: String,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit,
 ) {
@@ -141,13 +169,6 @@ fun TaskListContent(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-
-            SearchBar(
-                query = query,
-                onQueryChanged = onQueryChanged,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,

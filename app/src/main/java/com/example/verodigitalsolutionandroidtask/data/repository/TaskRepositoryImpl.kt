@@ -6,24 +6,22 @@ import com.example.verodigitalsolutionandroidtask.data.mapToEntity
 import com.example.verodigitalsolutionandroidtask.domain.Task
 import com.example.verodigitalsolutionandroidtask.domain.repository.TaskRepository
 import com.example.verodigitalsolutionandroidtask.network.ApiService
-import com.example.verodigitalsolutionandroidtask.ui.network.NetworkManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.collections.map
 
 class TaskRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val taskDao: TaskDao,
-    private val networkManager: NetworkManager
+    private val taskDao: TaskDao
 ) : TaskRepository {
-    override suspend fun getTasks(): List<Task> {
-        return if (networkManager.hasInternet()) {
-            val taskEntities = apiService.getTasks().map { it.mapToEntity() }
 
-            taskDao.insertTasks(taskEntities)
+    override var allTasks: Flow<List<Task>> = taskDao.getTasks().map { it.map { it.mapToDomain() } }
 
-            taskEntities.map { it.mapToDomain() }
-        } else {
-            taskDao.getTasks().map { it.mapToDomain() }
-        }
+    override suspend fun fetchAndSaveTasks() {
+         apiService.getTasks().map { it.mapToEntity() } .also {
+             taskDao.insertTasks(it)
+         }
     }
+
 }

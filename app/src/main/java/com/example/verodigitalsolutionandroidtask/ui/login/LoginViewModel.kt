@@ -2,7 +2,7 @@ package com.example.verodigitalsolutionandroidtask.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.verodigitalsolutionandroidtask.data.datastore.AuthDataStore
+import com.example.verodigitalsolutionandroidtask.data.datastore.AppDataStore
 import com.example.verodigitalsolutionandroidtask.domain.usecase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val authDataStore: AuthDataStore
+    private val appDataStore: AppDataStore
 ) : ViewModel() {
 
     private val username = "365"
@@ -29,7 +29,7 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            authDataStore.accessTokenFlow.first()?.let {
+            appDataStore.accessTokenFlow.first()?.let {
                 _loginUiState.value = LoginUiState.Success
             }
         }

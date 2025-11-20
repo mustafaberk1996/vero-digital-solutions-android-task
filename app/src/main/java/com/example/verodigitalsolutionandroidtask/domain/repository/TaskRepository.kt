@@ -1,8 +1,10 @@
 package com.example.verodigitalsolutionandroidtask.domain.repository
 
 import com.example.verodigitalsolutionandroidtask.domain.Task
+import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
 
-    suspend fun getTasks():List<Task>
+    var allTasks: Flow<List<Task>>
+    suspend fun fetchAndSaveTasks()
 }
