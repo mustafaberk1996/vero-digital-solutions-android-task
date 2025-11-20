@@ -3,7 +3,7 @@ package com.example.verodigitalsolutionandroidtask.data.repository
 import com.example.verodigitalsolutionandroidtask.data.local.dao.TaskDao
 import com.example.verodigitalsolutionandroidtask.data.local.entity.mapToDomain
 import com.example.verodigitalsolutionandroidtask.data.mapToEntity
-import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.domain.model.Task
 import com.example.verodigitalsolutionandroidtask.domain.repository.TaskRepository
 import com.example.verodigitalsolutionandroidtask.network.ApiService
 import kotlinx.coroutines.flow.Flow

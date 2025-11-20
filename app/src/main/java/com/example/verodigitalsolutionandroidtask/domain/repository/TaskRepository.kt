@@ -1,6 +1,6 @@
 package com.example.verodigitalsolutionandroidtask.domain.repository
 
-import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.domain.model.Task
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {

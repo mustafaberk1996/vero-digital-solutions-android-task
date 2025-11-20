@@ -1,6 +1,6 @@
 package com.example.verodigitalsolutionandroidtask.ui
 
-import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.domain.model.Task
 
 object MockData {
 

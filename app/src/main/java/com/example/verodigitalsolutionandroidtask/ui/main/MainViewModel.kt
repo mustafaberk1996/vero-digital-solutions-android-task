@@ -3,21 +3,18 @@ package com.example.verodigitalsolutionandroidtask.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.verodigitalsolutionandroidtask.data.datastore.AppDataStore
-import com.example.verodigitalsolutionandroidtask.domain.filter
+import com.example.verodigitalsolutionandroidtask.domain.model.FetchType
+import com.example.verodigitalsolutionandroidtask.domain.model.filter
 import com.example.verodigitalsolutionandroidtask.domain.usecase.FetchTasks
 import com.example.verodigitalsolutionandroidtask.domain.usecase.LogoutUseCase
 import com.example.verodigitalsolutionandroidtask.domain.usecase.ObserveTasks
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -48,9 +45,11 @@ class MainViewModel @Inject constructor(
         }.toString()
     }
 
+    val lastFetchType: Flow<String?> = appDataStore.lastFetchTypeFlow
+
     init {
         observeTasks()
-        fetchTaskList()
+        fetchTaskList(FetchType.INITIAL_FETCH)
     }
 
     private fun observeTasks() {
@@ -69,11 +68,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun fetchTaskList() {
+    private fun fetchTaskList(fetchType:FetchType) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                fetchTasks()
+                fetchTasks(fetchType)
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message ?: "Unknown error") }
@@ -99,7 +98,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun onRefresh() {
-        fetchTaskList()
+        fetchTaskList(fetchType = FetchType.SWIPE)
     }
 
 }

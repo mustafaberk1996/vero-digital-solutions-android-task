@@ -1,6 +1,6 @@
 package com.example.verodigitalsolutionandroidtask.domain.usecase
 
-import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.domain.model.Task
 import com.example.verodigitalsolutionandroidtask.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

@@ -38,13 +38,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.domain.model.Task
 import com.example.verodigitalsolutionandroidtask.ui.RefreshWorker
 import com.example.verodigitalsolutionandroidtask.ui.component.EmptyState
 import com.example.verodigitalsolutionandroidtask.ui.component.ErrorState
 import com.example.verodigitalsolutionandroidtask.ui.component.LoadingState
 import com.example.verodigitalsolutionandroidtask.ui.theme.VeroDigitalSolutionAndroidTaskTheme
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
@@ -60,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 val state: MainUiState by viewModel.uiState.collectAsState()
                 val query:String by viewModel.query.collectAsState()
                 val lastFetchTime by viewModel.lastFetchTime.collectAsState(null)
+                val lastFetchType by viewModel.lastFetchType.collectAsState(null)
 
                 LaunchedEffect(state) {
                     if(state.logOut){
@@ -73,6 +75,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         state = state,
                         lastFetchTime = lastFetchTime,
+                        lastFetchType = lastFetchType,
                         onLogoutButtonClicked = {
                             viewModel.logout()
                         },
@@ -90,7 +93,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startRefreshWorker() {
-        val refreshRequest = PeriodicWorkRequestBuilder<RefreshWorker>(60, TimeUnit.MINUTES)
+        val refreshRequest = PeriodicWorkRequestBuilder<RefreshWorker>(15, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
@@ -98,6 +101,7 @@ class MainActivity : ComponentActivity() {
             ExistingPeriodicWorkPolicy.REPLACE,
             refreshRequest
         )
+        Timber.d("Refresh worker started")
     }
 }
 
@@ -109,7 +113,8 @@ fun MainContent(
     onQueryChanged: (String) -> Unit,
     onRefresh: () -> Unit,
     query: String,
-    lastFetchTime: String? = null
+    lastFetchTime: String? = null,
+    lastFetchType:String? = null
 ) {
     Box(
         modifier = modifier
@@ -121,8 +126,13 @@ fun MainContent(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
 
-                if (!lastFetchTime.isNullOrBlank()) {
-                    Text("Last update: $lastFetchTime")
+                Column{
+                    if (!lastFetchTime.isNullOrBlank()) {
+                        Text("Last update: $lastFetchTime")
+                    }
+                    if (!lastFetchType.isNullOrBlank()) {
+                        Text("Fetch Type: $lastFetchType")
+                    }
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Button(onClick = { onLogoutButtonClicked() }) {

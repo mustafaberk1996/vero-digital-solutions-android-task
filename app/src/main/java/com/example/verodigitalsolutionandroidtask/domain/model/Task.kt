@@ -1,4 +1,4 @@
-package com.example.verodigitalsolutionandroidtask.domain
+package com.example.verodigitalsolutionandroidtask.domain.model
 
 data class Task(
     val task: String,

@@ -2,7 +2,7 @@ package com.example.verodigitalsolutionandroidtask.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.verodigitalsolutionandroidtask.domain.Task
+import com.example.verodigitalsolutionandroidtask.domain.model.Task
 import java.util.UUID
 
 @Entity(tableName = "tasks")
