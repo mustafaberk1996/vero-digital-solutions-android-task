@@ -2,6 +2,7 @@ package com.example.verodigitalsolutionandroidtask.ui.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -18,11 +19,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -31,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -62,6 +69,7 @@ class MainActivity : ComponentActivity() {
                 val query:String by viewModel.query.collectAsState()
                 val lastFetchTime by viewModel.lastFetchTime.collectAsState(null)
                 val lastFetchType by viewModel.lastFetchType.collectAsState(null)
+                var openQrCodeScannerScreen by rememberSaveable { mutableStateOf(false) }
 
                 LaunchedEffect(state) {
                     if(state.logOut){
@@ -70,23 +78,42 @@ class MainActivity : ComponentActivity() {
                 }
 
 
+                BackHandler {
+                    if (openQrCodeScannerScreen) {
+                        openQrCodeScannerScreen = false
+                    }
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainContent(
-                        modifier = Modifier.padding(innerPadding),
-                        state = state,
-                        lastFetchTime = lastFetchTime,
-                        lastFetchType = lastFetchType,
-                        onLogoutButtonClicked = {
-                            viewModel.logout()
-                        },
-                        onQueryChanged = {
-                            viewModel.onQueryChanged(it)
-                        },
-                        query = query,
-                        onRefresh = {
-                            viewModel.onRefresh()
+                    Box{
+                        MainContent(
+                            modifier = Modifier.padding(innerPadding),
+                            state = state,
+                            lastFetchTime = lastFetchTime,
+                            lastFetchType = lastFetchType,
+                            onLogoutButtonClicked = {
+                                viewModel.logout()
+                            },
+                            onQueryChanged = {
+                                viewModel.onQueryChanged(it)
+                            },
+                            query = query,
+                            onRefresh = {
+                                viewModel.onRefresh()
+                            },
+                            onQrCodeScannerClicked = {
+                                openQrCodeScannerScreen = true
+                            }
+                        )
+                        if (openQrCodeScannerScreen) {
+                            QrCodeScannerScreen(onCloseClicked = {
+                                openQrCodeScannerScreen = false
+                            }, onQrScanned = {code->
+                                openQrCodeScannerScreen = false
+                                viewModel.onQueryChanged(code)}
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
@@ -114,7 +141,8 @@ fun MainContent(
     onRefresh: () -> Unit,
     query: String,
     lastFetchTime: String? = null,
-    lastFetchType:String? = null
+    lastFetchType:String? = null,
+    onQrCodeScannerClicked: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -156,7 +184,8 @@ fun MainContent(
                 else ->  TaskListContent(
                     tasks = state.data,
                     isRefreshing = state.isLoading,
-                    onRefresh = onRefresh
+                    onRefresh = onRefresh,
+                    onQrCodeScannerClicked = onQrCodeScannerClicked
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -172,6 +201,7 @@ fun TaskListContent(
     tasks: List<Task>,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit,
+    onQrCodeScannerClicked:()->Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -196,6 +226,18 @@ fun TaskListContent(
                 }
             }
         }
+
+        FloatingActionButton(
+            modifier = Modifier
+                .padding(16.dp)
+                .align(alignment = Alignment.BottomEnd),
+            onClick = { onQrCodeScannerClicked() },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Icon(Icons.Default.QrCode, contentDescription = "Scan Qr Code")
+        }
+
     }
 }
 
