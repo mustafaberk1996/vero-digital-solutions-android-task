@@ -21,10 +21,12 @@ class LoginViewModel @Inject constructor(
     private val _loginUiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState.Idle)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
 
-    init {
+    fun checkLoginState(){
         viewModelScope.launch {
             appDataStore.accessTokenFlow.first()?.let {
                 _loginUiState.value = LoginUiState.Success
+            }?:run {
+                _loginUiState.value = LoginUiState.Idle
             }
         }
     }

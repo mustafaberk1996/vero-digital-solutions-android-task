@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -29,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -71,6 +73,7 @@ class MainActivity : ComponentActivity() {
                 val lastFetchTime by viewModel.lastFetchTime.collectAsState(null)
                 val lastFetchType by viewModel.lastFetchType.collectAsState(null)
                 var openQrCodeScannerScreen by rememberSaveable { mutableStateOf(false) }
+                var showExitAlertDialog by rememberSaveable { mutableStateOf(false) }
 
                 LaunchedEffect(state) {
                     if(state.logOut){
@@ -82,7 +85,35 @@ class MainActivity : ComponentActivity() {
                 BackHandler {
                     if (openQrCodeScannerScreen) {
                         openQrCodeScannerScreen = false
+                    }else{
+                       showExitAlertDialog = !showExitAlertDialog
                     }
+                }
+
+                if (showExitAlertDialog){
+                    AlertDialog(
+                        onDismissRequest = {showExitAlertDialog = false},
+                        title = {
+                            Text(text = "Exit App")
+                        },
+                        text = {
+                            Text(text = "Do you really want to exit?")
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.logout()
+                            }) {
+                                Text("Yes")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                showExitAlertDialog = false
+                            }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
