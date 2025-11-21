@@ -7,6 +7,6 @@ class LogoutUseCase @Inject constructor(
     private val appDataStore: AppDataStore
 ){
     suspend operator fun invoke(){
-        appDataStore.removeAccessToken()
+        appDataStore.clearAllData()
     }
 }

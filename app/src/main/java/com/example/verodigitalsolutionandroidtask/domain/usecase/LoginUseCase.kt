@@ -5,14 +5,17 @@ import com.example.verodigitalsolutionandroidtask.domain.repository.AuthReposito
 import com.example.verodigitalsolutionandroidtask.ui.login.LoginUiState
 import javax.inject.Inject
 
-class LoginUseCase @Inject constructor(private val authRepository: AuthRepository, private val appDataStore: AppDataStore) {
+class LoginUseCase @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val appDataStore: AppDataStore
+) {
 
-    suspend operator fun invoke(username: String, password: String): LoginUiState {
+    suspend operator fun invoke(username: String = "365", password: String = "1"): LoginUiState {
         try {
-            val result =  authRepository.login(username, password)
+            val result = authRepository.login(username, password)
             appDataStore.saveAccessToken(result.oauth.access_token)
             return LoginUiState.Success
-        }catch (exception: Exception){
+        } catch (exception: Exception) {
             return LoginUiState.Error(exception)
         }
     }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -28,7 +29,7 @@ class MainViewModel @Inject constructor(
     private val fetchTasks: FetchTasks,
     private val logoutUseCase: LogoutUseCase,
     private val observeTasksUseCase: ObserveTasks,
-    private val appDataStore: AppDataStore
+    private val appDataStore: AppDataStore,
 ): ViewModel() {
 
 
@@ -75,7 +76,8 @@ class MainViewModel @Inject constructor(
                 fetchTasks(fetchType)
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message ?: "Unknown error") }
+                val errorCode = (e as? HttpException)?.code() ?: -1
+                _uiState.update { it.copy(isLoading = false, error = MainUiError(message = e.message ?: "Unknown error", code = errorCode)) }
             }
         }
     }
@@ -93,7 +95,6 @@ class MainViewModel @Inject constructor(
                     logOut = true
                 )
             }
-
         }
     }
 

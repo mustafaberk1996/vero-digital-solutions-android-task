@@ -33,11 +33,11 @@ class AppDataStore  @Inject constructor(
         Timber.d("Access token saved: $token")
     }
 
-    suspend fun removeAccessToken(){
+    suspend fun clearAllData(){
         context.dataStore.edit { preferences ->
-            preferences.remove(ACCESS_TOKEN_KEY)
+            preferences.clear()
         }
-        Timber.d("Access token removed")
+        Timber.d("All data cleared")
     }
 
     suspend fun saveLastFetchTime(fetchType: FetchType) {

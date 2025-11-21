@@ -18,14 +18,8 @@ class LoginViewModel @Inject constructor(
     private val appDataStore: AppDataStore
 ) : ViewModel() {
 
-    private val username = "365"
-    private val password = "1"
-
-
     private val _loginUiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState.Idle)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
-
-
 
     init {
         viewModelScope.launch {
@@ -38,7 +32,7 @@ class LoginViewModel @Inject constructor(
     fun loginButtonClicked(){
         viewModelScope.launch {
             _loginUiState.value = LoginUiState.Loading
-            _loginUiState.value = loginUseCase(username, password)
+            _loginUiState.value = loginUseCase()
         }
     }
 

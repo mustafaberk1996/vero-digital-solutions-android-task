@@ -40,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        startRefreshWorker()
+        //startRefreshWorker()
         setContent {
 
             VeroDigitalSolutionAndroidTaskTheme {
@@ -106,7 +107,8 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                         if (openQrCodeScannerScreen) {
-                            QrCodeScannerScreen(onCloseClicked = {
+                            QrCodeScannerScreen(modifier = Modifier.padding(innerPadding),
+                                onCloseClicked = {
                                 openQrCodeScannerScreen = false
                             }, onQrScanned = {code->
                                 openQrCodeScannerScreen = false
@@ -145,7 +147,7 @@ fun MainContent(
     onQrCodeScannerClicked: () -> Unit
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier.padding(4.dp)
     ){
         Column {
 
@@ -168,6 +170,22 @@ fun MainContent(
                 }
             }
 
+
+            if (state.error != null && state.error.code == 401) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "You session has been expired. Please try to re-login to the app.",
+                        textAlign = TextAlign.Center
+                    )
+                }
+                return
+            }
+
+
+
             if (!state.data.isEmpty() || query.isNotEmpty()) {
                 SearchBar(
                     query = query,
@@ -177,9 +195,12 @@ fun MainContent(
                 )
             }
 
+            if(state.error != null && state.error.code != 401){
+                ErrorState(message = state.error.message, onRetry = onRefresh)
+            }
+
             when {
                 state.isLoading -> LoadingState()
-                state.error != null -> ErrorState(message = state.error, onRefresh)
                 state.data.isEmpty() && state.query.isBlank()  -> EmptyState()
                 else ->  TaskListContent(
                     tasks = state.data,

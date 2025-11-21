@@ -6,6 +6,8 @@ data class MainUiState(
     val query: String = "",
     val data: List<Task> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: MainUiError? = null,
     val logOut: Boolean = false
 )
+
+data class MainUiError(val message: String, val code: Int)
