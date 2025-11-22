@@ -1,34 +1,30 @@
 package com.example.verodigitalsolutionandroidtask.ui.worker
 
 import android.content.Context
-import androidx.work.Worker
+import androidx.hilt.work.HiltWorker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import com.example.verodigitalsolutionandroidtask.domain.model.FetchType
+import com.example.verodigitalsolutionandroidtask.domain.usecase.FetchTasks
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import timber.log.Timber
-import javax.inject.Inject
 
-class RefreshWorker @Inject constructor(
-    context: Context,
-    workerParameters: WorkerParameters
-) :
-    Worker(context, workerParameters) {
+@HiltWorker
+class RefreshWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted workerParameters: WorkerParameters,
+    private val fetchTasks: FetchTasks
+) : CoroutineWorker(context, workerParameters) {
 
-        private val job = SupervisorJob()
-        private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
-        override fun doWork(): Result {
-            coroutineScope.launch {
-                //fetchTasks(fetchType = FetchType.WORKER)
-                Timber.Forest.d("Refresh worker triggered!")
-            }
+    override suspend fun doWork(): Result {
+        return runCatching {
+            fetchTasks(fetchType = FetchType.WORKER)
+            Timber.d("Refresh worker triggered!")
             return Result.success()
-        }
-
-        override fun onStopped() {
-            super.onStopped()
-            job.cancel()
-        }
+        }.onFailure {
+            return Result.retry()
+        }.getOrElse { Result.retry() }
+    }
 
 }

@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.hilt.worker)
     implementation(libs.datastore)
     implementation(libs.timber)
-    implementation(libs.workManager)
+    implementation(libs.work.runtime.ktx)
     implementation(libs.material.extended)
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)

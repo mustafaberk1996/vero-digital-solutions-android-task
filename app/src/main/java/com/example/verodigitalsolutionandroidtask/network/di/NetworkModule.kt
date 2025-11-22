@@ -1,5 +1,6 @@
 package com.example.verodigitalsolutionandroidtask.network.di
 
+import com.example.verodigitalsolutionandroidtask.BuildConfig
 import com.example.verodigitalsolutionandroidtask.network.ApiService
 import com.example.verodigitalsolutionandroidtask.network.AuthInterceptor
 import dagger.Module
@@ -23,7 +24,10 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level =
+                if (BuildConfig.DEBUG)
+                    HttpLoggingInterceptor.Level.BODY
+                else HttpLoggingInterceptor.Level.NONE
         }
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
