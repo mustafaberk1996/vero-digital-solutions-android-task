@@ -29,7 +29,7 @@ class App: Application(), Configuration.Provider {
             Timber.plant(Timber.DebugTree())
         }
 
-        val request = PeriodicWorkRequestBuilder<RefreshWorker>(15, TimeUnit.MINUTES)
+        val request = PeriodicWorkRequestBuilder<RefreshWorker>(60, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(this)
