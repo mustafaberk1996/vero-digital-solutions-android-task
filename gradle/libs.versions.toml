@@ -37,7 +37,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+hilt-work-compiler = { module = "androidx.hilt:hilt-compiler", version = "1.1.0" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-compose" }
+hilt-worker = { module = "androidx.hilt:hilt-work", version.ref = "hilt-compose" }
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
@@ -52,7 +54,6 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
-datastore-crypto = { module = "androidx.security:security-crypto", version = "1.1.0-alpha03" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 workManager = { module = "androidx.work:work-runtime-ktx", version.ref = "workmanager" }
 

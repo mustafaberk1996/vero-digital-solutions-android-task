@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -52,9 +53,10 @@ dependencies {
     kapt(libs.room.compiler)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    kapt(libs.hilt.work.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.worker)
     implementation(libs.datastore)
-    implementation(libs.datastore.crypto)
     implementation(libs.timber)
     implementation(libs.workManager)
     implementation(libs.material.extended)

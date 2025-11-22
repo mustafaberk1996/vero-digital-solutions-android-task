@@ -98,8 +98,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onRefresh() {
-        fetchTaskList(fetchType = FetchType.SWIPE)
+    fun onRefresh(fetchType: FetchType) {
+        fetchTaskList(fetchType = fetchType)
     }
 
 }

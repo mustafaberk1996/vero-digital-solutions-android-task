@@ -48,8 +48,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.verodigitalsolutionandroidtask.domain.model.FetchType
 import com.example.verodigitalsolutionandroidtask.domain.model.Task
-import com.example.verodigitalsolutionandroidtask.ui.RefreshWorker
+import com.example.verodigitalsolutionandroidtask.ui.worker.RefreshWorker
 import com.example.verodigitalsolutionandroidtask.ui.component.EmptyState
 import com.example.verodigitalsolutionandroidtask.ui.component.ErrorState
 import com.example.verodigitalsolutionandroidtask.ui.component.LoadingState
@@ -63,7 +64,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        //startRefreshWorker()
         setContent {
 
             VeroDigitalSolutionAndroidTaskTheme {
@@ -130,8 +130,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel.onQueryChanged(it)
                             },
                             query = query,
-                            onRefresh = {
-                                viewModel.onRefresh()
+                            onRefresh = {fetchType->
+                                viewModel.onRefresh(fetchType)
                             },
                             onQrCodeScannerClicked = {
                                 openQrCodeScannerScreen = true
@@ -151,18 +151,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    private fun startRefreshWorker() {
-        val refreshRequest = PeriodicWorkRequestBuilder<RefreshWorker>(15, TimeUnit.MINUTES)
-            .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "refresh_worker",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            refreshRequest
-        )
-        Timber.d("Refresh worker started")
-    }
 }
 
 @Composable
@@ -171,7 +159,7 @@ fun MainContent(
     state: MainUiState,
     onLogoutButtonClicked: () -> Unit,
     onQueryChanged: (String) -> Unit,
-    onRefresh: () -> Unit,
+    onRefresh: (FetchType) -> Unit,
     query: String,
     lastFetchTime: String? = null,
     lastFetchType:String? = null,
@@ -227,7 +215,7 @@ fun MainContent(
             }
 
             if(state.error != null && state.error.code != 401){
-                ErrorState(message = state.error.message, onRetry = onRefresh)
+                ErrorState(message = state.error.message, onRetry = {onRefresh(FetchType.RETRY)})
             }
 
             when {
@@ -252,7 +240,7 @@ fun TaskListContent(
     modifier: Modifier = Modifier,
     tasks: List<Task>,
     isRefreshing: Boolean = false,
-    onRefresh: () -> Unit,
+    onRefresh: (FetchType) -> Unit,
     onQrCodeScannerClicked:()->Unit
 ) {
     Box(
@@ -264,7 +252,7 @@ fun TaskListContent(
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
-                onRefresh = onRefresh,
+                onRefresh = {onRefresh(FetchType.SWIPE)},
                 modifier = modifier
             ) {
                 if (!tasks.isEmpty()) {

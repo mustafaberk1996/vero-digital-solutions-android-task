@@ -1,4 +1,4 @@
-package com.example.verodigitalsolutionandroidtask.data
+package com.example.verodigitalsolutionandroidtask.data.network.model
 
 import com.example.verodigitalsolutionandroidtask.data.local.entity.TaskEntity
 import com.google.gson.annotations.SerializedName

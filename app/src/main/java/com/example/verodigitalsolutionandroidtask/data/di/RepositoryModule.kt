@@ -1,4 +1,4 @@
-package com.example.verodigitalsolutionandroidtask.data
+package com.example.verodigitalsolutionandroidtask.data.di
 
 import com.example.verodigitalsolutionandroidtask.data.repository.AuthRepositoryImpl
 import com.example.verodigitalsolutionandroidtask.data.repository.TaskRepositoryImpl

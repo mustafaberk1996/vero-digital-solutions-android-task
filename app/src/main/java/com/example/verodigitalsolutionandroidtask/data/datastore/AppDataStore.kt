@@ -1,12 +1,14 @@
 package com.example.verodigitalsolutionandroidtask.data.datastore
 
 import android.content.Context
+import android.util.Base64
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.verodigitalsolutionandroidtask.data.crypto.CryptoManager
 import com.example.verodigitalsolutionandroidtask.domain.model.FetchType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +17,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_prefs")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_prefs")
 
 @Singleton
 class AppDataStore  @Inject constructor(
@@ -23,12 +25,16 @@ class AppDataStore  @Inject constructor(
 ){
 
     private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
+    private val ACCESS_TOKEN_IV_KEY = stringPreferencesKey("access_token_iv")
     private val LAST_FETCH_TIME_KEY = longPreferencesKey("last_fetch_time")
     private val LAST_FETCH_TYPE_KEY = stringPreferencesKey("last_fetch_type")
 
     suspend fun saveAccessToken(token: String) {
+        val (iv, tokenCipherText) = CryptoManager.encrypt(token)
+
         context.dataStore.edit { preferences ->
-            preferences[ACCESS_TOKEN_KEY] = token
+            preferences[ACCESS_TOKEN_KEY] = Base64.encodeToString(tokenCipherText, Base64.DEFAULT)
+            preferences[ACCESS_TOKEN_IV_KEY] = Base64.encodeToString(iv, Base64.DEFAULT)
         }
         Timber.d("Access token saved: $token")
     }
@@ -58,6 +64,18 @@ class AppDataStore  @Inject constructor(
 
     val accessTokenFlow: Flow<String?> = context.dataStore.data
         .map { preferences ->
-            preferences[ACCESS_TOKEN_KEY]
+            val iv = preferences[ACCESS_TOKEN_IV_KEY]?.let {
+                Base64.decode(it, Base64.DEFAULT)
+            }
+
+            val cipherText = preferences[ACCESS_TOKEN_KEY]?.let {
+                Base64.decode(it, Base64.DEFAULT)
+            }
+
+            if (iv!=null && cipherText!=null){
+                CryptoManager.decrypt(iv, cipherText)
+            }else{
+                null
+            }
         }
 }

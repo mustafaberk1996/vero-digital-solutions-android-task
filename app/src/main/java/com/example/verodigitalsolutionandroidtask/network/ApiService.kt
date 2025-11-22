@@ -1,6 +1,6 @@
 package com.example.verodigitalsolutionandroidtask.network
 
-import com.example.verodigitalsolutionandroidtask.data.TaskResponse
+import com.example.verodigitalsolutionandroidtask.data.network.model.TaskResponse
 import com.example.verodigitalsolutionandroidtask.network.model.LoginRequest
 import com.example.verodigitalsolutionandroidtask.network.model.LoginResponse
 import retrofit2.http.Body
